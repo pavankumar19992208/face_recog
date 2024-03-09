@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="text" name="userid" placeholder="User ID" required>
+        <input type="file" name="images" accept="image/*" capture="camera" multiple required>
+        <input type="submit" value="Register">
+    </form>
+    <button id="capture">Capture</button>
+    <video id="video" width="480" height="360" autoplay></video>
+    <canvas id="canvas" width="480" height="360"></canvas>
+    <div id="preview"></div>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <script>
+        var video = document.getElementById('video');
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+            });
+        }
+
+        document.getElementById('capture').addEventListener('click', function() {
+            var canvas = document.getElementById('canvas');
+            canvas.getContext('2d').drawImage(video, 0, 0, 480, 360);
+            var data = canvas.toDataURL('image/png');
+            var preview = document.getElementById('preview');
+            preview.innerHTML += '<img src="' + data + '">';
+        });
+
+        document.querySelector('input[type=file]').onchange = function() {
+            var preview = document.getElementById('preview');
+            preview.innerHTML = '';
+            for (var i = 0; i < this.files.length; i++) {
+                preview.innerHTML += '<p>' + this.files[i].name + '</p>';
+            }
+        };
+    </script>
+</body>
+</html>

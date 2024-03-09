@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>Welcome to our site!</h1>
+    <a href="{{ url_for('register') }}">Register new user</a>    <br>
+    <form action="/download" method="post">
+        <select name="month">
+            <option value="">Select month</option>
+            {% for i in range(1, 13) %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+        <select name="day">
+            <option value="">Select day</option>
+            {% for i in range(1, 32) %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Download</button>
+    </form>
+</body>
+</html>
