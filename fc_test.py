@@ -120,6 +120,8 @@ def register():
     return render_template('register.html')
 
 
+
+
 @app.route('/download', methods=['POST'])
 def download():
     # Get the month and day from the form data
@@ -148,6 +150,14 @@ def download():
     for file in files:
         zipf.write(file)
     zipf.close()
+
+    @after_this_request
+    def remove_file(response):
+        try:
+            os.remove('Files.zip')
+        except Exception as error:
+            app.logger.error("Error removing or closing downloaded file handle", error)
+        return response
 
     return send_file('Files.zip', as_attachment=True)
 
