@@ -1,4 +1,4 @@
-from flask import Flask, render_template , request, send_file
+from flask import Flask, render_template, request, send_file, after_this_request
 from threading import Thread
 import cv2
 import face_recognition
