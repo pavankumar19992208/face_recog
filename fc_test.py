@@ -29,7 +29,7 @@ def face_recognition_code():
             image = face_recognition.load_image_file(image_path)
             face_encoding = face_recognition.face_encodings(image)[0]
             known_face_encodings.append(face_encoding)
-            known_face_names.append(filename.rsplit('(', 1)[0])  # Remove the extension from filename
+            known_face_names.append(filename.rsplit('_', 1)[0])  # Remove the extension from filename
 
     # Start the webcam feed
     video_capture = cv2.VideoCapture(0)
@@ -63,17 +63,19 @@ def face_recognition_code():
 
                 # Write the details to a CSV file only if the username hasn't been written yet
                 filename = now.strftime("%Y-%m-%d") + ".csv"
+                found_in_csv = False
                 if os.path.exists(filename):
                     with open(filename, 'r') as file:
                         reader = csv.reader(file)
                         if any(userid == row[0] for row in reader):
                             color = (0, 255, 0)  # Green color for known faces
-                            continue
+                            found_in_csv = True
 
-                with open(filename, 'a', newline='') as file:
-                    writer = csv.writer(file)
-                    writer.writerow([userid,name, now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S")])
-                written_usernames.add(name)
+                if not found_in_csv:
+                    with open(filename, 'a', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([userid,name, now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S")])
+                    written_usernames.add(name)
 
             # Draw a box around the face
             cv2.rectangle(frame, (left, top), (right, bottom), color, 2)
@@ -81,8 +83,6 @@ def face_recognition_code():
             # Draw a label with a name below the face
             cv2.rectangle(frame, (left, bottom - 35), (right, bottom), color, cv2.FILLED)
             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-
- 
 
         # Display the current date and time on the video
         cv2.putText(frame, current_time, (10, 30), font, 1.0, (255, 255, 255), 1)
@@ -96,7 +96,6 @@ def face_recognition_code():
 
     video_capture.release()
     cv2.destroyAllWindows()
-
 
 
 # Flask route

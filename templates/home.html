@@ -2,24 +2,43 @@
 <html>
 <head>
     <title>Home</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <style>
+        .custom-form {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to our site!</h1>
-    <a href="{{ url_for('register') }}">Register new user</a>    <br>
-    <form action="/download" method="post">
-        <select name="month">
-            <option value="">Select month</option>
-            {% for i in range(1, 13) %}
-                <option value="{{ i }}">{{ i }}</option>
-            {% endfor %}
-        </select>
-        <select name="day">
-            <option value="">Select day</option>
-            {% for i in range(1, 32) %}
-                <option value="{{ i }}">{{ i }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">Download</button>
-    </form>
+    <div class="container">
+        <h1 class="my-4">FACE RECOGNITION BASED ATTENDANCE SYSTEM</h1>
+        <a class="btn btn-primary mb-4" href="{{ url_for('register') }}">Register new user</a>
+        <div class="custom-form">
+            <form action="/download" method="post">
+                <div class="form-group">
+                    <label for="month">Month</label>
+                    <select class="form-control" name="month" id="month">
+                        <option value="">Select month</option>
+                        {% for i in range(1, 13) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="day">Day</label>
+                    <select class="form-control" name="day" id="day">
+                        <option value="">Select day</option>
+                        {% for i in range(1, 32) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">Download</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 </body>
 </html>
