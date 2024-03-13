@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, after_this_request
+from flask import Flask, render_template, request, send_file, after_this_request, redirect, url_for
 from threading import Thread
 import cv2
 import face_recognition
@@ -9,19 +9,25 @@ import zipfile
 import glob
 from werkzeug.utils import secure_filename
 import base64
+import threading
+import time
 
 app = Flask(__name__)
 @app.route('/')
 def home():
     return render_template('home.html')
 
+@app.route('/start_face_recognition')
+def start_face_recognition():
+    thread = threading.Thread(target=face_recognition_code)
+    thread.start()
+    return redirect(url_for('home'))
+
 def face_recognition_code():
     # Load the known images and get their face encodings
     known_face_encodings = []
     known_face_names = []
     images_dir = "images"
-    now = datetime.datetime.now()
-    current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
     for filename in os.listdir(images_dir):
         if filename.endswith(".jpg") or filename.endswith(".png"):
@@ -40,13 +46,20 @@ def face_recognition_code():
     # Define the font here
     font = cv2.FONT_HERSHEY_DUPLEX
 
+    last_face_detected_time = time.time()  # Initialize the timer
+
     while True:
         # Grab a single frame of video
         ret, frame = video_capture.read()
+        now = datetime.datetime.now()
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
         # Find all the faces and face encodings in the current frame of video
         face_locations = face_recognition.face_locations(frame)
         face_encodings = face_recognition.face_encodings(frame, face_locations)
+
+        if face_locations:  # If any face is detected
+            last_face_detected_time = time.time()  # Reset the timer
 
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # See if the face is a match for the known face(s)
@@ -83,12 +96,13 @@ def face_recognition_code():
             # Draw a label with a name below the face
             cv2.rectangle(frame, (left, bottom - 35), (right, bottom), color, cv2.FILLED)
             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-
         # Display the current date and time on the video
         cv2.putText(frame, current_time, (10, 30), font, 1.0, (255, 255, 255), 1)
 
         # Display the resulting image
         cv2.imshow('Video', frame)
+        if time.time() - last_face_detected_time > 5 * 60:  # 10 minutes * 60 seconds
+            break
 
         # Hit 'q' on the keyboard to quit!
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -98,8 +112,9 @@ def face_recognition_code():
     cv2.destroyAllWindows()
 
 
-# Flask route
 
+
+# Flask route
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -160,12 +175,7 @@ def download():
 
     return send_file('Files.zip', as_attachment=True)
 
-def run_flask_app():
-    app.run(host='0.0.0.0', debug=True, use_reloader=False)
 
-if __name__ == "__main__":
-    # Start the face recognition code in a new thread
-    Thread(target=face_recognition_code).start()
 
-    # Start the Flask application in a new thread
-    Thread(target=run_flask_app).start()
+if __name__ == '__main__':
+    app.run(debug=True)
